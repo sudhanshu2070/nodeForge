@@ -1,3 +1,6 @@
+const passport = require('passport');
+const { signToken } = require('../services/jwt.service'); // Importing signToken
+
 exports.googleAuth = passport.authenticate('google', {
   scope: ['profile', 'email']
 });
