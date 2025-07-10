@@ -19,7 +19,7 @@ app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 
 // Routes
 app.use('/api/auth', require('./routes/auth.routes'));
