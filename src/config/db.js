@@ -4,11 +4,8 @@ require('dotenv').config();
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      auth: {
-        username: process.env.DB_USER,
-        password: process.env.DB_PASSWORD
-      },
-      authSource: 'admin'
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
     console.log('MongoDB Connected');
   } catch (err) {
