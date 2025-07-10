@@ -6,7 +6,8 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 // DB Connection
-require('./config/db');
+const connectDB = require('./config/db');
+connectDB();
 
 // Passport config
 require('./config/passport');
