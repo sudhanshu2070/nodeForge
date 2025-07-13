@@ -5,9 +5,10 @@ const User = require('../models/user.model');
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: process.env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback'
+  callbackURL: process.env.GOOGLE_CALLBACK_URL
 }, async (accessToken, refreshToken, profile, done) => {
   try {
+    console.log('✅ Google Profile:', profile);
     let user = await User.findOne({ googleId: profile.id });
     
     if (!user) {
@@ -16,10 +17,14 @@ passport.use(new GoogleStrategy({
         email: profile.emails[0].value,
         name: profile.displayName
       });
+      console.log('✅ New Google user created:', user);
+    }else {
+      console.log('✅ Existing Google user found:', user);
     }
     
     done(null, user);
   } catch (err) {
+    console.error('❌ Error in Google Strategy:', err);
     done(err);
   }
 }));
