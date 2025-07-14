@@ -1,6 +1,7 @@
 const authService = require('../services/auth.service');
 const { signToken } = require('../services/jwt.service');
 const User = require('../models/user.model');
+const emailService = require('../services/email.service');
 
 
 exports.signup = async (req, res, next) => {
