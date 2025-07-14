@@ -8,7 +8,6 @@ passport.use(new GoogleStrategy({
   callbackURL: process.env.GOOGLE_CALLBACK_URL
 }, async (accessToken, refreshToken, profile, done) => {
   try {
-    console.log('✅ Google Profile:', profile);
     let user = await User.findOne({ googleId: profile.id });
     
     if (!user) {
@@ -17,7 +16,6 @@ passport.use(new GoogleStrategy({
         email: profile.emails[0].value,
         name: profile.displayName
       });
-      console.log('✅ New Google user created:', user);
     }else {
       console.log('✅ Existing Google user found:', user);
     }
