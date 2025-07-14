@@ -23,6 +23,21 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
   },
+  userId: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: {
+    type: String,
+  },
+  verificationTokenExpires: {
+    type: Date,
+  }
 }, { timestamps: true });
 
 // Password hashing middleware
