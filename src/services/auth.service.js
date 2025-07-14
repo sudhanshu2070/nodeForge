@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const User = require('../models/user.model');
 const { signToken } = require('./jwt.service');
 
@@ -13,5 +14,14 @@ exports.login = async (email, password) => {
   if (!user || !(await user.correctPassword(password))) {
     throw new Error('Incorrect email or password');
   }
-  return signToken(user._id);
+  
+  // Generating a secure token
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+
+  // Setting token + expiry on user
+  user.verificationToken = verificationToken;
+  user.verificationTokenExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
+  await user.save();
+
+  return { user, verificationToken };
 };
