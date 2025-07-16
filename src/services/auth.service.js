@@ -1,6 +1,5 @@
 const crypto = require('crypto');
 const User = require('../models/user.model');
-const { signToken } = require('./jwt.service');
 
 exports.register = async (email, password, name) => {
   if (await User.findOne({ email })) {
