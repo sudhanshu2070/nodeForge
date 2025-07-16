@@ -1,7 +1,7 @@
 const authService = require('../services/auth.service');
 const { signToken } = require('../services/jwt.service');
 const User = require('../models/user.model');
-const emailService = require('../services/email.service');
+const verificationService = require('../services/verification.service');
 
 
 exports.signup = async (req, res, next) => {
@@ -19,10 +19,7 @@ exports.login = async (req, res, next) => {
     const { email, password } = req.body;
     const { user, verificationToken } = await authService.login(email, password);
 
-    const verificationUrl = `${process.env.CLIENT_URL}/verify?token=${verificationToken}&userId=${user._id}`;
-
-    // Sending verification link via email
-    await emailService.sendVerificationLink(user.email, verificationUrl);
+    await verificationService.sendLoginVerification(user);
 
     res.status(200).json({
       status: 'success',
