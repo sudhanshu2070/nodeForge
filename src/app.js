@@ -26,5 +26,10 @@ app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/auth', require('./routes/google.routes'));
 
 // Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Auth service running on port ${PORT}`));
+
+if (process.env.NODE_ENV !== 'serverless') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => console.log(`Auth service running on port ${PORT}`));
+}
+
+module.exports = app; // Exporting the app for serverless deployment
