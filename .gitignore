@@ -46,3 +46,12 @@ Thumbs.db
 
 # Test output
 test-results/
+
+# AWS Lambda deployment zip
+function.zip
+
+# VS Code settings
+.vscode/
+
+# Serverless build artifacts (if using Serverless Framework)
+.serverless/
