@@ -21,6 +21,11 @@ app.use(express.json());
 app.use(passport.initialize());
 // app.use(passport.session());
 
+// Health check route
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', message: 'Auth service is running.' });
+});
+
 // Routes
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/auth', require('./routes/google.routes'));
