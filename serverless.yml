@@ -1,28 +1,8 @@
-service: nodeForgeAPI
-
-provider:
-  name: aws
-  runtime: nodejs18.x      # Or nodejs22.x if supported
-  region: eu-north-1       # Your AWS region
-  environment:
-    NODE_ENV: production
-    CLIENT_URL: https://your-client-url.com
-    MONGO_URI: your_mongo_connection_string
-
 functions:
-  app:
-    handler: src/lambda.handler
+  auth:
+    handler: lambda.handler
     events:
       - http:
-          path: /{proxy+}   # catch-all proxy for all routes
-          method: any       # all HTTP methods
-
-package:
-  exclude:
-    - node_modules/**
-    - .gitignore
-    - .env
-    - README.md
-
-plugins:
-  - serverless-offline   # optional, for local testing
+          path: /{proxy+}
+          method: any
+          cors: true

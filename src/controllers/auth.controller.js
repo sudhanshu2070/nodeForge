@@ -5,6 +5,9 @@ const verificationService = require('../services/verification.service');
 
 
 exports.signup = async (req, res, next) => {
+  console.log('HEADERS:', req.headers);
+  console.log('BODY:', req.body);
+
   try {
     const { email, password, name } = req.body;
     const user = await authService.register(email, password, name);
