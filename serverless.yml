@@ -1,5 +1,6 @@
 functions:
   auth:
+    timeout: 10
     handler: lambda.handler
     events:
       - http:

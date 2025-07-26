@@ -13,7 +13,13 @@ exports.signup = async (req, res, next) => {
     const user = await authService.register(email, password, name);
     res.status(201).json({ status: 'success', data: { user } });
   } catch (err) {
-    next(err);
+    // next(err);
+      console.error('❌ Signup error:', err);
+      res.status(500).json({
+        status: 'error',
+        message: 'Signup failed',
+        detail: err.message,
+      });
   }
 };
 
