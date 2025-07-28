@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const passport = require('passport');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -18,17 +17,17 @@ const app = express();
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(cookieParser());
 
-// Convert AWS buffer body to string (if needed)
-app.use((req, res, next) => {
-  if (Buffer.isBuffer(req.body)) {
-    try {
-      req.body = JSON.parse(req.body.toString('utf8'));
-    } catch (e) {
-      console.error('Invalid JSON body:', e);
-    }
-  }
-  next();
-});
+// // Convert AWS buffer body to string (if needed)
+// app.use((req, res, next) => {
+//   if (Buffer.isBuffer(req.body)) {
+//     try {
+//       req.body = JSON.parse(req.body.toString('utf8'));
+//     } catch (e) {
+//       console.error('Invalid JSON body:', e);
+//     }
+//   }
+//   next();
+// });
 
 app.use(express.json());
 app.use(passport.initialize());
