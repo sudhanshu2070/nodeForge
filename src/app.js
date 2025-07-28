@@ -1,3 +1,4 @@
+require('dotenv').config({ path: '/home/ec2-user/nodeForge/.env' });// for ec2 instance deployment
 require('dotenv').config();
 const express = require('express');
 const passport = require('passport');
