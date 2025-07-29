@@ -3,14 +3,21 @@ const { signToken } = require('../services/jwt.service');
 const User = require('../models/user.model');
 const verificationService = require('../services/verification.service');
 
-
 exports.signup = async (req, res, next) => {
-  console.log('HEADERS:', req.headers);
-  console.log('BODY:', req.body);
 
   try {
-    const { email, password, name } = req.body;
-    const user = await authService.register(email, password, name);
+    const { email, password, name, phone } = req.body;
+
+    // Optionally validate inputs
+    if (!email || !password || !name || !phone) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Missing required fields: name, email, phone, or password',
+      });
+    }
+
+    const user = await authService.register(email, password, name, phone);
+
     res.status(201).json({ status: 'success', data: { user } });
   } catch (err) {
     // next(err);

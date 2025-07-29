@@ -1,11 +1,19 @@
 const crypto = require('crypto');
 const User = require('../models/user.model');
 
-exports.register = async (email, password, name) => {
+exports.register = async (email, password, name, phone) => {
+  // if email already exists
   if (await User.findOne({ email })) {
     throw new Error('Email already exists');
   }
-  return await User.create({ email, password, name });
+
+  // if phone already exists
+  if (await User.findOne({ phone })) {
+    throw new Error('Phone number already exists');
+  }
+
+  // Creating the user
+  return await User.create({ email, password, name, phone });
 };
 
 exports.login = async (email, password) => {
