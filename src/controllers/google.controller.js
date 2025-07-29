@@ -13,5 +13,5 @@ exports.googleCallback = async (req, res) => {
   await verificationService.sendLoginVerification(req.user)
 
   // res.redirect(`${process.env.CLIENT_URL}?token=${token}`);
-  res.redirect(`${process.env.CLIENT_URL}/verify-prompt`);
+  res.redirect(`${process.env.CLIENT_URL}/`);
 };
