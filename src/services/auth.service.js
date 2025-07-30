@@ -18,17 +18,19 @@ exports.register = async (email, password, name, phone) => {
 
 exports.login = async (email, password) => {
   const user = await User.findOne({ email }).select('+password');
+
   if (!user || !(await user.correctPassword(password))) {
-    throw new Error('Incorrect email or password');
+    throw new Error('Invalid email or password');
   }
-  
-  // Generating a secure token
-  const verificationToken = crypto.randomBytes(32).toString('hex');
 
-  // Setting token + expiry on user
-  user.verificationToken = verificationToken;
-  user.verificationTokenExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
-  await user.save();
+  // Don't log in unverified users immediately
+  if (!user.isVerified) {
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    user.verificationToken = verificationToken;
+    user.verificationTokenExpires = Date.now() + 15 * 60 * 1000; // 15 min
+    await user.save();
+    return { user, verificationToken };
+  }
 
-  return { user, verificationToken };
+  return { user };
 };

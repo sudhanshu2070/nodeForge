@@ -12,7 +12,7 @@ exports.signup = async (req, res, next) => {
     if (!email || !password || !name || !phone) {
       return res.status(400).json({
         status: 'error',
-        message: 'Missing required fields: name, email, phone, or password',
+        message: 'Missing required fields',
       });
     }
 
@@ -20,8 +20,7 @@ exports.signup = async (req, res, next) => {
 
     res.status(201).json({ status: 'success', data: { user } });
   } catch (err) {
-    // next(err);
-      console.error('❌ Signup error:', err);
+      console.error('Signup error:', err);
       res.status(500).json({
         status: 'error',
         message: 'Signup failed',
@@ -35,11 +34,23 @@ exports.login = async (req, res, next) => {
     const { email, password } = req.body;
     const { user, verificationToken } = await authService.login(email, password);
 
-    await verificationService.sendLoginVerification(user);
+    const verificationUrl = `${process.env.CLIENT_URL}/verify?token=${verificationToken}&userId=${user._id}`;
+
+    if (!user.isVerified) {
+      await emailService.sendVerificationLink(user.email, verificationUrl);
+      return res.status(200).json({
+        status: 'pending',
+        message: 'Verification link has been sent to your email.',
+      });
+    }
+
+    const jwtToken = signToken(user._id);
+    res.cookie('jwt', jwtToken, { httpOnly: true });
 
     res.status(200).json({
       status: 'success',
-      message: 'Verification link has been sent to your email.',
+      message: 'Logged in successfully',
+      token: jwtToken,
     });
   } catch (err) {
     next(err);
