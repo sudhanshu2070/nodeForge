@@ -42,8 +42,8 @@ if (process.env.NODE_ENV !== 'serverless') {
   // app.listen(PORT, () => console.log(`Auth service running on port ${PORT}`));
   
   const sslOptions = {
-    key: fs.readFileSync(path.join(__dirname, '..', 'ssl', 'key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, '..', 'ssl', 'cert.pem')),
+    key: fs.readFileSync(path.join(__dirname, '..', 'ssl2', 'key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, '..', 'ssl2', 'cert.pem')),
   };
 
   https.createServer(sslOptions, app).listen(PORT, () => {
@@ -52,3 +52,4 @@ if (process.env.NODE_ENV !== 'serverless') {
 }
 
 module.exports = app; // Exporting the app for serverless deployment
+
