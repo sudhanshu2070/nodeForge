@@ -37,7 +37,11 @@ exports.signup = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+
     const { user } = await authService.login(email, password);
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
 
     if (!user.isVerified) {
       return res.status(403).json({
@@ -47,17 +51,23 @@ exports.login = async (req, res, next) => {
     }
 
     const jwtToken = signToken(user._id);
-    res.cookie('jwt', jwtToken, { httpOnly: true });
+    res.cookie('jwt', jwtToken, { httpOnly: true});
 
-    res.status(200).json({
+    return res.status(200).json({
       status: 'success',
       message: 'Logged in successfully',
       token: jwtToken,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      },
     });
   } catch (err) {
     next(err);
   }
 };
+
 
 exports.verifyToken = async (req, res, next) => {
   try {
@@ -81,7 +91,16 @@ exports.verifyToken = async (req, res, next) => {
     const jwtToken = signToken(user._id);
     res.cookie('jwt', jwtToken, { httpOnly: true });
 
-    res.status(200).json({ message: 'Email verified and logged in.', token: jwtToken });
+    res.status(200).json({
+      message: 'Email verified and logged in.',
+      token: jwtToken,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      },
+    });
+
   } catch (err) {
     next(err);
   }
