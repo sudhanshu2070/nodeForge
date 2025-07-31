@@ -13,7 +13,15 @@ exports.register = async (email, password, name, phone) => {
   }
 
   // Creating the user
-  return await User.create({ email, password, name, phone });
+  const user = await User.create({ email, password, name, phone });
+
+  // Generating verification token
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+  user.verificationToken = verificationToken;
+  user.verificationTokenExpires = Date.now() + 60 * 60 * 1000; // 1 hour
+  await user.save();
+
+  return { user, verificationToken };
 };
 
 exports.login = async (email, password) => {
@@ -21,15 +29,6 @@ exports.login = async (email, password) => {
 
   if (!user || !(await user.correctPassword(password))) {
     throw new Error('Invalid email or password');
-  }
-
-  // Don't log in unverified users immediately
-  if (!user.isVerified) {
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    user.verificationToken = verificationToken;
-    user.verificationTokenExpires = Date.now() + 15 * 60 * 1000; // 15 min
-    await user.save();
-    return { user, verificationToken };
   }
 
   return { user };
