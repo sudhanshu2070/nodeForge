@@ -1,7 +1,9 @@
+const jwt = require('jsonwebtoken');
 const authService = require('../services/auth.service');
 const { signToken } = require('../services/jwt.service');
 const User = require('../models/user.model');
 const emailService = require('../services/email.service');
+
 
 exports.signup = async (req, res, next) => {
   try {
@@ -51,7 +53,12 @@ exports.login = async (req, res, next) => {
     }
 
     const jwtToken = signToken(user._id);
-    res.cookie('jwt', jwtToken, { httpOnly: true});
+    res.cookie('jwt', jwtToken, { 
+      httpOnly: true,
+      secure: false, // Set to true if using HTTPS
+      sameSite: 'Lax',
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
 
     return res.status(200).json({
       status: 'success',
@@ -105,3 +112,25 @@ exports.verifyToken = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.verifyOnRefresh = async (req, res, next) => {
+  try {
+    const token = req.cookies.jwt;
+    if (!token) return res.status(401).json({ message: 'Not authenticated' });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.status(200).json({ user });
+  } catch (err) {
+    res.status(401).json({ message: 'Invalid or expired token' });
+    next(err);
+  }
+}; 
+
+exports.logout = (req, res) => {
+  res.clearCookie('jwt', { httpOnly: true, secure: false, sameSite: 'Lax' });
+  res.status(200).json({ message: 'Logged out successfully' });
+}
