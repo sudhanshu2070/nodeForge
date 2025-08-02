@@ -66,7 +66,7 @@ exports.login = async (req, res, next) => {
       token: jwtToken,
       user: {
         id: user._id,
-        username: user.username,
+        name: user.name,
         email: user.email,
       },
     });
@@ -103,7 +103,7 @@ exports.verifyToken = async (req, res, next) => {
       token: jwtToken,
       user: {
         id: user._id,
-        username: user.username,
+        name: user.name,
         email: user.email,
       },
     });
