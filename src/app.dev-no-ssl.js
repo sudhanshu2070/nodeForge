@@ -1,3 +1,7 @@
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
+
 require('dotenv').config({ path: '/home/ec2-user/nodeForge/.env' });// for ec2 instance deployment
 require('dotenv').config();
 
@@ -35,7 +39,17 @@ app.use('/api/auth', require('./routes/google.routes'));
 // Start server
 if (process.env.NODE_ENV !== 'serverless') {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => console.log(`Auth service running on port ${PORT}`));
+  // app.listen(PORT, () => console.log(`Auth service running on port ${PORT}`));
+  
+  const sslOptions = {
+    key: fs.readFileSync(path.join(__dirname, '..', 'ssl2', 'key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, '..', 'ssl2', 'cert.pem')),
+  };
+
+  https.createServer(sslOptions, app).listen(PORT, () => {
+    console.log(`HTTPS server running at :${PORT}`);
+  });
 }
 
 module.exports = app; // Exporting the app for serverless deployment
+
