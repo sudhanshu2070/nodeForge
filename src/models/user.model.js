@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    mathch: [/^[a-zA-Z\s]+$/, 'Please use a valid name.'],
+  },
   email: {
     type: String,
     required: true,
@@ -55,7 +60,7 @@ userSchema.pre('save', async function (next) {
 
     while (!unique) {
       const randomNum = Math.floor(100000 + Math.random() * 900000); // 6-digit number
-      newId = `PWP-${randomNum}`;
+      newId = `PWP${randomNum}`;
       const existing = await this.constructor.findOne({ userId: newId });
       if (!existing) {
         unique = true;
