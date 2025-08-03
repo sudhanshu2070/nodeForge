@@ -40,8 +40,9 @@ exports.login = async (req, res, next) => {
   try {
     const { emailOrUserId, password } = req.body;
 
+    const { user } = await authService.login(emailOrUserId, password);
+    
     if (!user) {
-      const { user } = await authService.login(emailOrUserId, password);
       return res.status(401).json({ message: 'Invalid email/user ID or password' });
     }
 
