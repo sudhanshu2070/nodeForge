@@ -16,6 +16,13 @@ exports.googleCallback = async (req, res) => {
     await req.user.save();
   }
 
-  // Sending token back in URL so frontend can store/use it
-  res.redirect(`${process.env.CLIENT_URL}/verify?token=${token}&userId=${req.user._id}`);
+  res.cookie('jwt', token, {
+    httpOnly: true,
+    secure: false, // Set to true if using HTTPS
+    sameSite: 'Lax',
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+  });
+
+  // Redirect to dashboard WITHOUT token in URL
+  res.redirect(`${process.env.CLIENT_URL}/dashboard`);  
 };
