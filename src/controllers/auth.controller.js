@@ -38,11 +38,11 @@ exports.signup = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { emailOrUserId, password } = req.body;
 
-    const { user } = await authService.login(email, password);
     if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      const { user } = await authService.login(emailOrUserId, password);
+      return res.status(401).json({ message: 'Invalid email/user ID or password' });
     }
 
     if (!user.isEmailVerified) {

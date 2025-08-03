@@ -57,7 +57,7 @@ exports.sendWelcomeEmail = async (user) => {
 
   try {
     await sgMail.send(msg);
-    console.log('Welcome email sent to:', user.email);
+    // console.log('Welcome email sent to:', user.email);
   } catch (error) {
     console.error('Error sending welcome email:', error);
   }

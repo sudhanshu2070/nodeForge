@@ -25,10 +25,15 @@ exports.register = async (email, password, name, phone) => {
   return { user, verificationToken };
 };
 
-exports.login = async (email, password) => {
+exports.login = async (emailOrUserId, password) => {
   try {
-    const user = await User.findOne({ email }).select('+password');
-    
+    const user = await User.findOne({
+      $or: [
+        { email: emailOrUserId.toLowerCase() },
+        { userId: emailOrUserId.toUpperCase() },
+      ]
+    }).select('+password');
+
     if (!user) {
       throw new Error('User not found');
     }
