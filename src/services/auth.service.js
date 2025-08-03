@@ -27,7 +27,6 @@ exports.register = async (email, password, name, phone) => {
 
 exports.login = async (emailOrUserId, password) => {
   try {
-    console.log('Login attempt for:', emailOrUserId);
     const user = await User.findOne({
       $or: [
         { email: emailOrUserId.toLowerCase() },
