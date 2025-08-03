@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const User = require('../models/user.model');
+const { nextTick } = require('process');
 
 exports.register = async (email, password, name, phone) => {
   // if email already exists
@@ -25,11 +26,21 @@ exports.register = async (email, password, name, phone) => {
 };
 
 exports.login = async (email, password) => {
-  const user = await User.findOne({ email }).select('+password');
+  try {
+    const user = await User.findOne({ email }).select('+password');
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
 
-  if (!user || !(await user.correctPassword(password))) {
-    throw new Error('Invalid email or password');
+    const isCorrectPassword = await user.correctPassword(password);
+    if (!isCorrectPassword) {
+      throw new Error("Password doesn't match");
+    }
+
+    return { user };
+  } catch (err) {
+    // Re-throwing the error so the controller can handle it
+    throw err;
   }
-
-  return { user };
 };

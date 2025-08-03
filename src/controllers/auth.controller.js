@@ -65,7 +65,7 @@ exports.login = async (req, res, next) => {
       message: 'Logged in successfully',
       token: jwtToken,
       user: {
-        id: user._id,
+        userId: user.userId,
         name: user.name,
         email: user.email,
       },

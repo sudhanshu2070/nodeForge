@@ -64,8 +64,11 @@ app.use((req, res, next) => {
 
 // Error Handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Internal server error' });
+  console.error(err);  // Log the error for debugging
+  const statusCode = err.statusCode || 500;  // Default to 500 if no status code is set
+  res.status(statusCode).json({
+    message: err.message || 'Something went wrong',
+  });
 });
 
 // Start server
