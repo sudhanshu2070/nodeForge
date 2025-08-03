@@ -17,7 +17,7 @@ passport.use(new GoogleStrategy({
         googleId: profile.id,
         email: profile.emails[0].value,
         name: profile.displayName,
-        isVerified: true, // Automatically verified if using Google login
+        isEmailVerified: true, // Automatically verified if using Google login
         phone: '0000000000' // You may later ask the user to update this
         // Note: userId is generated automatically in the model's pre-save hook
       });

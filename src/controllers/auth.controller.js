@@ -45,11 +45,22 @@ exports.login = async (req, res, next) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    if (!user.isVerified) {
+    if (!user.isEmailVerified) {
       return res.status(403).json({
         status: 'error',
         message: 'Email not verified. Please check your inbox.',
       });
+    }
+
+    // Checking if it's the first login
+    if (user.isFirstLogin) {
+
+      // Sending the Welcome Email if it's the first login
+      await emailService.sendWelcomeEmail(user);
+
+      // Setting isFirstLogin to false after sending the welcome email
+      user.isFirstLogin = false;
+      await user.save();
     }
 
     const jwtToken = signToken(user._id);
@@ -92,7 +103,18 @@ exports.verifyToken = async (req, res, next) => {
     // Clearing token and verify user
     user.verificationToken = undefined;
     user.verificationTokenExpires = undefined;
-    user.isVerified = true;
+    user.isEmailVerified = true;
+    
+    // Checking if it's the first login
+    if (user.isFirstLogin) {
+
+      // Sending the Welcome Email if it's the first login
+      await emailService.sendWelcomeEmail(user);
+
+      // Setting isFirstLogin to false after sending the welcome email
+      user.isFirstLogin = false;
+    }
+    
     await user.save();
 
     const jwtToken = signToken(user._id);

@@ -30,3 +30,35 @@ exports.sendVerificationLink = async (email, verificationUrl) => {
 
   await sgMail.send(msg);
 };
+
+exports.sendWelcomeEmail = async (user) => {
+  const msg = {
+    to: user.email,
+    from: process.env.SENDGRID_FROM_EMAIL,
+    subject: `Welcome to ProfitWithPrecision, ${user.name}!`,
+    html: `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; padding: 40px 20px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
+          <tr>
+            <td style="padding: 40px 30px; text-align: center;">
+              <h2 style="color: #333; margin-bottom: 20px;">Welcome to ProfitWithPrecision, ${user.name}!</h2>
+              <p style="color: #555; font-size: 16px; line-height: 1.5;">We're excited to have you on board! Now that your account is set up, you can start enjoying our services right away. Please don't hesitate to reach out if you need any assistance.</p>
+              <p style="color: #555; font-size: 16px; line-height: 1.5;">Here's your unique User ID: <strong>${user.userId}</strong></p>
+              <p style="color: #999; font-size: 14px;">If you have any questions, feel free to contact our support team at any time.</p>
+              <p style="color: #999; font-size: 14px;">We wish you the best as you begin your journey with us!</p>
+              <p style="color: #aaa; font-size: 13px; margin-top: 30px;">This email was sent to ${user.email}</p>
+            </td>
+          </tr>
+        </table>
+        <p style="text-align: center; color: #aaa; font-size: 12px; margin-top: 20px;">&copy; ${new Date().getFullYear()} ProfitWithPrecision. All rights reserved.</p>
+      </div>
+    `,
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log('Welcome email sent to:', user.email);
+  } catch (error) {
+    console.error('Error sending welcome email:', error);
+  }
+};

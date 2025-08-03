@@ -38,9 +38,13 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true,
   },
-  isVerified: {
+  isEmailVerified: {
     type: Boolean,
     default: false,
+  },
+  isFirstLogin: {
+    type: Boolean,
+    default: true,
   },
   verificationToken: {
     type: String,
