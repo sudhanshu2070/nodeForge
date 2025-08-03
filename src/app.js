@@ -1,5 +1,4 @@
 require('dotenv').config({ path: '/home/ec2-user/nodeForge/.env' });// for ec2 instance deployment
-require('dotenv').config();
 
 const express = require('express');
 const passport = require('passport');
@@ -15,13 +14,39 @@ require('./config/passport');
 
 const app = express();
 
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'https://pwps.online',
+  'https://api.pwps.online'
+];
+
 // Middleware
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
 app.use(cookieParser());
 
 app.use(express.json());
 app.use(passport.initialize());
 // app.use(passport.session());
+
+// for nginx on ec2 instance
+app.get('/', (req, res) => {
+  res.status(200).json({
+    service: 'Authentication API',
+    status: 'Running',
+    version: '1.0.0',
+    docs: `${process.env.CLIENT_URL}/api-docs` // Optional
+  });
+});
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -31,6 +56,17 @@ app.get('/health', (req, res) => {
 // Routes
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/auth', require('./routes/google.routes'));
+
+// 404 Handler
+app.use((req, res, next) => {
+  res.status(404).json({ error: 'Endpoint not found' });
+});
+
+// Error Handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 // Start server
 if (process.env.NODE_ENV !== 'serverless') {
