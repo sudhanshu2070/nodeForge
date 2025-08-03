@@ -1,16 +1,19 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const Counter = require('./counter.model');
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    mathch: [/^[a-zA-Z\s]+$/, 'Please use a valid name.'],
+    match: [/^[a-zA-Z\s]+$/, 'Please use a valid name.'],
   },
   email: {
     type: String,
     required: true,
     unique: true,
+    lowercase: true,
+    trim: true,
     match: [/^\S+@\S+\.\S+$/, 'Please use a valid email address.'],
   },
   phone: {
@@ -49,25 +52,21 @@ const userSchema = new mongoose.Schema({
 
 // Password hashing middleware
 userSchema.pre('save', async function (next) {
-  if (this.isModified('password')) {
+  if (this.isModified('password') && this.password) {
     this.password = await bcrypt.hash(this.password, 12);
   }
 
   // Generating custom userId like "PWP-XXXXXX"
-  if (!this.userId) {
-    let unique = false;
-    let newId;
+  if (this.isNew && !this.userId) {
+    const counter = await Counter.findByIdAndUpdate(
+      { _id: 'userId' },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
 
-    while (!unique) {
-      const randomNum = Math.floor(100000 + Math.random() * 900000); // 6-digit number
-      newId = `PWP${randomNum}`;
-      const existing = await this.constructor.findOne({ userId: newId });
-      if (!existing) {
-        unique = true;
-      }
-    }
+    const padded = String(counter.seq).padStart(6, '0');
 
-    this.userId = newId;
+    this.userId = `PWP${padded}`;
   }
 
   next();
