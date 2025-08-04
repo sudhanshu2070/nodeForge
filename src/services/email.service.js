@@ -62,3 +62,54 @@ exports.sendWelcomeEmail = async (user) => {
     console.error('Error sending welcome email:', error);
   }
 };
+
+exports.sendPasswordResetEmail = async (email, resetUrl) => {
+  const mailOptions = {
+    from: process.env.SENDGRID_FROM_EMAIL,
+    to: email,
+    subject: 'Password Reset Request',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">Password Reset Request</h2>
+        <p>You requested a password reset. Click the link below to set a new password:</p>
+        <a href="${resetUrl}" 
+           style="display: inline-block; padding: 10px 20px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">
+          Reset Password
+        </a>
+        <p>If you didn't request this, please ignore this email.</p>
+        <p style="color: #6b7280; font-size: 0.9rem; margin-top: 30px;">
+          This link will expire in 1 hour.
+        </p>
+      </div>
+    `
+  };
+
+  // await transporter.sendMail(mailOptions);
+  try {
+    await sgMail.send(mailOptions);
+  } catch (error) {
+    console.error('Error sending welcome email:', error);
+  }
+};
+
+exports.sendPasswordChangedEmail = async (email) => {
+  const mailOptions = {
+    from: process.env.EMAIL_FROM,
+    to: email,
+    subject: 'Password Changed Successfully',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">Password Updated</h2>
+        <p>Your password has been successfully changed.</p>
+        <p>If you didn't make this change, please contact us immediately.</p>
+      </div>
+    `
+  };
+
+  // await transporter.sendMail(mailOptions);
+  try {
+    await sgMail.send(mailOptions);
+  } catch (error) {
+    console.error('Error sending welcome email:', error);
+  }
+};

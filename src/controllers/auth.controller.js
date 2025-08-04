@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const authService = require('../services/auth.service');
 const { signToken } = require('../services/jwt.service');
 const User = require('../models/user.model');
@@ -157,3 +158,162 @@ exports.logout = (req, res) => {
   res.clearCookie('jwt', { httpOnly: true, secure: false, sameSite: 'Lax' });
   res.status(200).json({ message: 'Logged out successfully' });
 }
+
+
+
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(200).json({ 
+        status: 'success', 
+        message: 'If an account exists, a reset link has been sent' 
+      });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+
+    // Set token expiry (1 hour)
+    user.resetPasswordToken = resetPasswordToken;
+    user.resetPasswordExpire = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // Create reset URL
+    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+
+    // Send email
+    await emailService.sendPasswordResetEmail(user.email, resetUrl);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Password reset link sent to email'
+    });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({
+      status: 'error',
+      message: 'Error sending reset email'
+    });
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+    // Get hashed token
+    const resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(req.params.token)
+      .digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid or expired token'
+      });
+    }
+
+    // Set new password
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    // Generate new JWT
+    const token = signToken(user._id);
+    res.cookie('jwt', token, { 
+      httpOnly: true,
+      secure: false,
+      sameSite: 'Lax',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Password updated successfully',
+      token
+    });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({
+      status: 'error',
+      message: 'Error resetting password'
+    });
+  }
+};
+
+exports.setupPassword = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    const token = req.cookies.jwt;
+    
+    if (!token) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Not authenticated'
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+
+    // Check if user has password (Google users won't have one initially)
+    if (user.password) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Password already set'
+      });
+    }
+
+    // Set password
+    user.password = password;
+    await user.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Password set successfully'
+    });
+  } catch (err) {
+    console.error('Setup password error:', err);
+    res.status(500).json({
+      status: 'error',
+      message: 'Error setting password'
+    });
+  }
+};
+
+exports.checkPasswordStatus = async (req, res) => {
+  try {
+    const token = req.cookies.jwt;
+    if (!token) return res.status(401).json({ message: 'Not authenticated' });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.status(200).json({
+      hasPassword: !!user.password
+    });
+  } catch (err) {
+    res.status(401).json({ message: 'Invalid or expired token' });
+  }
+};

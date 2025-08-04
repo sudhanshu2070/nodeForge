@@ -51,7 +51,14 @@ const userSchema = new mongoose.Schema({
   },
   verificationTokenExpires: {
     type: Date,
-  }
+  },
+  resetPasswordToken: {
+    type: String,
+  },
+  resetPasswordExpire: {
+    type: Date,
+  },
+
 }, { timestamps: true });
 
 // Password hashing middleware
