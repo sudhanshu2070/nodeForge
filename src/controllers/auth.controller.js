@@ -38,9 +38,9 @@ exports.signup = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    const { emailOrUserId, password } = req.body;
+    const { usernameOrEmail, password } = req.body;
 
-    const { user } = await authService.login(emailOrUserId, password);
+    const { user } = await authService.login(usernameOrEmail, password);
     
     if (!user) {
       return res.status(401).json({ message: 'Invalid email/user ID or password' });

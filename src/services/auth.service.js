@@ -27,6 +27,10 @@ exports.register = async (email, password, name, phone) => {
 
 exports.login = async (emailOrUserId, password) => {
   try {
+    if (typeof emailOrUserId !== 'string' || typeof password !== 'string') {
+      throw new Error('Email/User ID and password are required.');
+    }
+
     const user = await User.findOne({
       $or: [
         { email: emailOrUserId.toLowerCase() },
