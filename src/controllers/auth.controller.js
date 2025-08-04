@@ -126,9 +126,11 @@ exports.verifyToken = async (req, res, next) => {
       message: 'Email verified and logged in.',
       token: jwtToken,
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      ...(user.googleId && { googleId: user.googleId }), // Only include if exists
+      hasPassword: !!user.password, // Checking if user has a password
       },
     });
 
