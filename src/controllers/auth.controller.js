@@ -129,8 +129,8 @@ exports.verifyToken = async (req, res, next) => {
       id: user._id,
       name: user.name,
       email: user.email,
-      ...(user.googleId && { googleId: user.googleId }), // Only include if exists
-      hasPassword: !!user.password, // Checking if user has a password
+      googleId: user.googleId || null, // Will be null for email users
+      password: user.password || null, // Will be null if not set
       },
     });
 
