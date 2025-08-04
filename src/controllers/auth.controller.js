@@ -129,8 +129,6 @@ exports.verifyToken = async (req, res, next) => {
       id: user._id,
       name: user.name,
       email: user.email,
-      googleId: user.googleId || null, // Will be null for email users
-      password: user.password || null, // Will be null if not set
       },
     });
 

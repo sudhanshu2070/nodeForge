@@ -23,13 +23,6 @@ exports.googleCallback = async (req, res) => {
     maxAge: 24 * 60 * 60 * 1000, // 1 day
   });
 
-  // Checking if Google user needs to set password
-  console.log('User:', req.user);
-  if (!req.user.password) {
-    // Redirect to setup-password with token in URL
-    return res.redirect(`${process.env.CLIENT_URL}/setup-password?token=${token}`);
-  }
-
-  // Regular successful login
-  res.redirect(`${process.env.CLIENT_URL}/dashboard`);
+  // Redirect to dashboard WITHOUT token in URL
+  res.redirect(`${process.env.CLIENT_URL}/dashboard`);  
 };
