@@ -6,7 +6,7 @@ module.exports = {
     autorestart: true,
     watch: false,
     env: {
-      NODE_ENV: 'production',
+      NODE_ENV: 'prod',
       NODE_PATH: '/home/ec2-user/nodeForge'
     }
   }]
