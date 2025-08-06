@@ -30,7 +30,6 @@ const allowedOrigins = [
   process.env.CLIENT_URL,
   'https://pwps.online',
   'https://api.pwps.online',
-  'https://api.pwps.online/api',
 ];
 
 // Security Middleware: Helmet
@@ -43,12 +42,12 @@ app.use(helmet({
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+      return callback(null, true);
     }
+    
+    // Log and deny
     console.warn(`CORS blocked: ${origin}`);
-    callback(new Error('Not allowed by CORS'));
+    return callback(new Error('Not allowed by CORS'));
   },
   credentials: true
 }));
