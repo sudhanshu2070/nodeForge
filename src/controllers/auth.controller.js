@@ -206,7 +206,7 @@ exports.forgotPassword = async (req, res, next) => {
 
 exports.resetPassword = async (req, res, next) => {
   try {
-    // Get hashed token
+    // Hash the token
     const resetPasswordToken = crypto
       .createHash('sha256')
       .update(req.params.token)
@@ -224,25 +224,25 @@ exports.resetPassword = async (req, res, next) => {
       });
     }
 
-    // Set new password
+    // Setting new password and invalidate sessions
     user.password = req.body.password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
+    user.sessionVersion = (user.sessionVersion || 0) + 1;
+
     await user.save();
 
-    // Generate new JWT
-    const token = signToken(user._id);
-    res.cookie('jwt', token, { 
+    // forcing re-login
+    // Clearing any existing cookies
+    res.clearCookie('jwt', {
       httpOnly: true,
-      secure: false,
-      sameSite: 'Lax',
-      maxAge: 24 * 60 * 60 * 1000,
+      secure: false, // Set to true if using HTTPS
+      sameSite: 'Lax'
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       status: 'success',
-      message: 'Password updated successfully',
-      token
+      message: 'Password updated successfully. Please log in again.'
     });
   } catch (err) {
     console.error('Reset password error:', err);
