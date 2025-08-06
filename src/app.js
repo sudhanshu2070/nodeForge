@@ -44,7 +44,7 @@ app.use(cors({
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       return callback(null, true);
     }
-    
+
     // Log and deny
     console.warn(`CORS blocked: ${origin}`);
     return callback(new Error('Not allowed by CORS'));
@@ -53,7 +53,7 @@ app.use(cors({
 }));
 
 app.use(cookieParser());
-express.json({ limit: '10kb' }); // Limit JSON body size to 10kb
+app.use(express.json({ limit: '10kb' })); // Limit JSON body size to 10kb
 
 // Rate Limiting
 const authLimiter = rateLimit({
