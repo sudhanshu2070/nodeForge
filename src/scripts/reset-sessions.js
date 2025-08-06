@@ -15,7 +15,7 @@ async function resetAllSessions() {
     console.log(`All users will be logged out on next refresh.`);
     process.exit(0);
   } catch (err) {
-    console.error('❌ Error resetting sessions:', err);
+    console.error('Error resetting sessions:', err);
     process.exit(1);
   }
 }
