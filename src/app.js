@@ -29,7 +29,8 @@ app.set('trust proxy', 1); // Enables rate limiter to use X-Forwarded-For
 const allowedOrigins = [
   process.env.CLIENT_URL,
   'https://pwps.online',
-  'https://api.pwps.online'
+  'https://api.pwps.online',
+  'https://api.pwps.online/api',
 ];
 
 // Security Middleware: Helmet
