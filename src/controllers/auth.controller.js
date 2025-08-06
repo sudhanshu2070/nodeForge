@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const authService = require('../services/auth.service');
-const { signToken } = require('../services/jwt.service');
+const { signJWTToken, verifyJWTToken } = require('../services/jwt.service');
 const User = require('../models/user.model');
 const emailService = require('../services/email.service');
 
@@ -28,7 +28,7 @@ exports.signup = async (req, res, next) => {
       message: 'Registration successful. Please verify your email.',
     });
   } catch (err) {
-    console.error('Signup error:', err);
+    console.error('Signup error:', err.message);
     res.status(500).json({
       status: 'error',
       message: 'Signup failed',
@@ -65,7 +65,7 @@ exports.login = async (req, res, next) => {
       await user.save();
     }
 
-    const jwtToken = signToken(user._id);
+    const jwtToken = signJWTToken(user._id, user.sessionVersion);
     res.cookie('jwt', jwtToken, { 
       httpOnly: true,
       secure: false, // Set to true if using HTTPS
@@ -119,7 +119,7 @@ exports.verifyToken = async (req, res, next) => {
     
     await user.save();
 
-    const jwtToken = signToken(user._id);
+    const jwtToken = signJWTToken(user._id, user.sessionVersion);
     res.cookie('jwt', jwtToken, { httpOnly: true });
 
     res.status(200).json({
@@ -142,12 +142,20 @@ exports.verifyOnRefresh = async (req, res, next) => {
     const token = req.cookies.jwt;
     if (!token) return res.status(401).json({ message: 'Not authenticated' });
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verifyJWTToken(token);
     const user = await User.findById(decoded.id).select('-password');
 
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    res.status(200).json({ user });
+    // Checking session version matches
+    if (user.sessionVersion !== decoded.sessionVersion) {
+      return res.status(401).json({ message: 'Session invalid. Please log in again.' });
+    }
+
+    // Excluding password from response
+    const { password, ...userData } = user.toObject();
+
+    res.status(200).json({ user: userData });
   } catch (err) {
     res.status(401).json({ message: 'Invalid or expired token' });
     next(err);
@@ -196,7 +204,7 @@ exports.forgotPassword = async (req, res, next) => {
       message: 'Password reset link sent to email'
     });
   } catch (err) {
-    console.error('Forgot password error:', err);
+    console.error('Forgot password error:', err.message);
     res.status(500).json({
       status: 'error',
       message: 'Error sending reset email'
@@ -228,6 +236,9 @@ exports.resetPassword = async (req, res, next) => {
     user.password = req.body.password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+
     user.sessionVersion = (user.sessionVersion || 0) + 1;
 
     await user.save();
@@ -245,7 +256,7 @@ exports.resetPassword = async (req, res, next) => {
       message: 'Password updated successfully. Please log in again.'
     });
   } catch (err) {
-    console.error('Reset password error:', err);
+    console.error('Reset password error:', err.message);
     res.status(500).json({
       status: 'error',
       message: 'Error resetting password'
@@ -292,7 +303,7 @@ exports.setupPassword = async (req, res, next) => {
       message: 'Password set successfully'
     });
   } catch (err) {
-    console.error('Setup password error:', err);
+    console.error('Setup password error:', err.message);
     res.status(500).json({
       status: 'error',
       message: 'Error setting password'

@@ -1,13 +1,13 @@
 const jwt = require('jsonwebtoken');
 const ApiError = require('../utils/apiError');
 
-const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+const signJWTToken = (id, sessionVersion) => {
+  return jwt.sign({ id, sessionVersion}, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN
   });
 };
 
-const verifyToken = (token) => {
+const verifyJWTToken = (token) => {
   try {
     return jwt.verify(token, process.env.JWT_SECRET);
   } catch (err) {
@@ -15,4 +15,4 @@ const verifyToken = (token) => {
   }
 };
 
-module.exports = { signToken, verifyToken };
+module.exports = { signJWTToken, verifyJWTToken };
