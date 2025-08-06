@@ -1,4 +1,10 @@
-require('dotenv').config({ path: '/home/ec2-user/nodeForge/.env' });// for ec2 instance deployment
+if (process.env.NODE_ENV === 'prod') {
+  require('dotenv').config({ path: '/home/ec2-user/nodeForge/.env' });
+} else {
+  require('dotenv').config(); // Uses .env in root
+}
+
+require('./utils/validateEnv')();
 
 const express = require('express');
 const passport = require('passport');
@@ -47,8 +53,7 @@ app.use(cors({
 }));
 
 app.use(cookieParser());
-
-app.use(express.json());
+express.json({ limit: '10kb' }); // Limit JSON body size to 10kb
 
 // Rate Limiting
 const authLimiter = rateLimit({
